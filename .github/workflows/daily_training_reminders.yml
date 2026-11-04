@@ -1,0 +1,59 @@
+
+# =====================================================
+# FILE TYPE: UNDERSTANDING YAML (.yml)
+# =====================================================
+#
+# A .yml file contains configuration instructions.
+#
+# Purpose:
+# Tells GitHub Actions when and how to run our
+# student staff training reminder automation.
+#
+# Analogy:
+# Think of this file as a supervisor's daily checklist.
+# It tells the system what tasks to complete, when to
+# complete them, and in what order.
+#
+# In this project, YAML instructs GitHub to:
+# 1. Run the Python reminder program each day.
+# 2. Check student staff training deadlines.
+# 3. Generate student reminder previews.
+# 4. Generate supervisor overdue notification previews.
+# 5. Save updated reminder history.
+#
+# =====================================================
+
+name: Daily Student Staff Training Reminders
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "0 15 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  run-training-reminders:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get project files
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Run training reminder program
+        run: python scheduled_reminders.py
+
+      - name: Save reminder history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reminder_history.json
+          git diff --cached --quiet || git commit -m "Update training reminder history"
+          git push
